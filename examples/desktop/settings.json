@@ -1,0 +1,9 @@
+{
+    "assistant_name": "Jarvis",
+    "listen_strategy": "RealTimeStrategy",
+    "threshold_silence": 0.5,
+    "frame_duration": 30,
+    "speech_threshold": 500,
+    "min_audio_length": 2.0,
+    "record_duration": 5
+}

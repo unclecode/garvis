@@ -1,0 +1,37 @@
+# Byte-compiled Python files
+*.pyc
+*.pyo
+*.pyd
+
+# Packages/libraries ( packages like numpy, scipy, etc.)
+*.egg
+dist
+build
+
+# IDE- and text editor-specific files
+.vscode/
+.idea/
+.project/
+.pydevproject/
+
+# Virtual environment files
+venv/
+.venv/
+env/
+.env
+
+# Other IDE-specific files
+*.sublime-workspace
+
+# Log files
+*.log
+
+# System files
+.DS_Store
+Thumbs.db
+
+
+# Any .env files including al subdirectories
+**/.env
+playground/
+backup/
