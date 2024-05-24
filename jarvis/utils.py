@@ -14,6 +14,7 @@ import tty
 import termios
 import shutil 
 import sys
+import aioconsole
 import threading
 
 lock = threading.Lock()
@@ -98,6 +99,17 @@ async def get_keypress():
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
     
     return await loop.run_in_executor(None, read_keypress)
+
+def get_keypress_sync():
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+
+    try:
+        tty.setraw(fd)
+        ch = sys.stdin.read(1)
+        return ch
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
 def call_transcribe_stream(audio_bytes: BytesIO, initial_prompt: str = ""):
     url = "https://colab.ngrok.pro/transcribe_stream"

@@ -70,6 +70,7 @@ class Jarvis:
                         
             if self.on_transcription_update:
                 self.on_transcription_update(index, text)
+                # asyncio.create_task(self.on_transcription_update(index, text))                
 
     def llm_update(self, text):
         if self.on_llm_update:
@@ -97,12 +98,12 @@ class Jarvis:
 
     async def process_collected_text(self):
         with self.transcription_lock:
-            all_text = ", ".join([chunk["text"] for chunk in self.collected_text])
+            all_text = ", ".join([chunk["text"].strip() for chunk in self.collected_text])
         
         await self.get_llm_response(all_text)
 
     def stop_talking(self, raise_event=False):
-        self.restart_mpv()
+        self.restart_mpv(raise_event=raise_event)
         # self.stop_tts(raise_event=raise_event)
         
     def stop_tts(self, raise_event=True):
@@ -115,11 +116,12 @@ class Jarvis:
                 self.mpv_process.kill()  # Force kill if it does not terminate in time
             finally:
                 self.mpv_process = None
-                raise_event and self.tts_stop()
+                
     
-    def restart_mpv(self):
-        self.stop_tts(raise_event=False)
-        time.sleep(0.2)
+    def restart_mpv(self, raise_event=True):
+        self.stop_tts(raise_event=raise_event)
+        time.sleep(0.1)
+        raise_event and self.tts_stop()
 
     async def text_to_speech_input_streaming(self, text_iterator):
         async with websockets.connect(WEBSOCKET_URI) as websocket:
@@ -170,11 +172,15 @@ class Jarvis:
                         except BrokenPipeError:
                             break
 
-                if self.mpv_process:
-                    if self.mpv_process.stdin:
-                        self.mpv_process.stdin.close()
-                    self.mpv_process.wait()
-                    
+                try:
+                    if self.mpv_process:
+                        if self.mpv_process.stdin:
+                            self.mpv_process.stdin.close()
+                        self.mpv_process.wait()
+                        
+                except Exception as e:
+                    pass
+                finally:
                     self.restart_mpv()
 
             listen_task = asyncio.create_task(stream(listen()))
@@ -219,6 +225,5 @@ class Jarvis:
         await self.text_to_speech_input_streaming(text_iterator())
 
     async def listen(self):
-        # self.stop_tts(raise_event=False)
-        # asyncio.create_task(self.audio_processor.toggle_listen())
+        self.collected_text = []
         await self.audio_processor.toggle_listen()

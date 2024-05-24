@@ -1,3 +1,4 @@
+import asyncio
 import time
 import numpy as np
 
@@ -29,11 +30,11 @@ class RealTimeStrategy(ListeningStrategy):
     def callback(self, audio_processor, index, text) -> bool:
         if self.last_text:
             audio_processor.audio_frames = []
-            audio_processor.stop_listening()
+            asyncio.create_task(audio_processor.toggle_listen())
             return False # There is no text to be passed to the transcription_update method
         elif text and self.stop_criteria and self.stop_criteria(text):
             audio_processor.audio_frames = []
-            audio_processor.stop_listening()
+            asyncio.create_task(audio_processor.toggle_listen())
             return False # There is no text to be passed to the transcription_update method
             
         return True # There is text to be passed to the transcription_update method
@@ -122,7 +123,9 @@ class FixedDurationStrategy(ListeningStrategy):
                     raise
 
 class RealTimeWithSilenceStrategy(ListeningStrategy):
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
+        self.threshold_silence = kwargs.get("threshold_silence", 0.5)
+        self.threshold_end = kwargs.get("threshold_end", self.threshold_silence * 8)
         pass
 
     async def listen(self, audio_processor):
@@ -149,25 +152,26 @@ class RealTimeWithSilenceStrategy(ListeningStrategy):
                     if not is_speech:
                         if silence_start is None:
                             silence_start = current_time
-                        elif current_time - silence_start > audio_processor.THRESHOLD_SILENCE:
+                        elif current_time - silence_start > self.threshold_silence:
                             audio_length = current_time - start_time
                             if audio_length >= audio_processor.MIN_AUDIO_LENGTH:
                                 audio_processor.log("Silence detected. Processing audio...")
                                 audio_processor.chunk_index += 1
-                                await audio_processor.process_audio(audio_processor.chunk_index, audio_processor.audio_frames.copy(), False, self.callback)
+                                audio_processor.process_audio(audio_processor.chunk_index, audio_processor.audio_frames.copy(), False, self.callback)
                                 silence_start = None
                                 start_time = None
                                 audio_processor.audio_frames = []
                             else:
-                                audio_processor.log("Audio length less than minimum threshold. Continuing to capture audio.")
+                                # audio_processor.log("Audio length less than minimum threshold. Continuing to capture audio.")
+                                pass
                     else:
                         silence_start = None
                         last_spoken_time = current_time
 
                     # Check if we need to stop listening due to extended silence
-                    if current_time - last_spoken_time > 5 * audio_processor.THRESHOLD_SILENCE:
+                    if current_time - last_spoken_time > self.threshold_end:
                         audio_processor.log("Extended silence detected. Stopping listening.")
-                        audio_processor.toggle_listen()
+                        await audio_processor.toggle_listen()
                         return
             except IOError as e:
                 if e.errno == -9981:

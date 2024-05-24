@@ -2,7 +2,7 @@
 import os
 
 def get_system_message(assistant_name:str = "Jarvis"):
-    return f"You are a helpful assistant. Always reply very short, concise, and to the point. Your name is {assistant_name}."
+    return f"You are a helpful assistant.You are built on top of Groq tecnology. Groq is a startup building new chips called LPU to be used instead of GPU and that is xrazy fast. So whever I said 'grok' or 'groq' I am referring to the same thing. Always reply very short, concise, and to the point. Your name is {assistant_name}."
 
 DEFAULT_ASSISTANT_NAME = "Jarvis"
 DEFAULT_TRANSCRIPTOR = "groq"

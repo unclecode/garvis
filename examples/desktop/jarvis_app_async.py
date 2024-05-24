@@ -1,10 +1,12 @@
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+
+import sys, os
 import tkinter as tk
 import asyncio
+import threading
 from jarvis.core_async import Jarvis
 from ui_manager import UIManager
-# from jarvis.listening_strategy import ContinuousUntilSilenceStrategy, RealTimeStrategy
 from jarvis.audio_processor_async import *
 from jarvis.config import *
 from jarvis.llm import *
@@ -21,8 +23,7 @@ class JarvisApp:
         
         self.jarvis = Jarvis(
             assistant_name=self.assistant_name,
-            listening_strategy=ContinuousUntilSilenceStrategy(verbose=True),
-            # listening_strategy= RealTimeStrategy(threshold_silence = 0.3),
+            listening_strategy=RealTimeWithSilenceStrategy(threshold_silence=0.4, threshold_end=2.5),
             transcriptor="colab",
             llm=AsyncGroq(),
             verbose=True
@@ -31,15 +32,16 @@ class JarvisApp:
         self.current_jarvis_message = None
         self.collected_text = []
         self.setup_event_handlers()
+        self.last_text = ""
 
         self.ui_manager.setup_ui()
-        
+        threading.Thread(target=self.run_asyncio_loop, daemon=True).start()
 
     def setup_event_handlers(self):
         self.jarvis.on_log = self.log
         self.jarvis.on_transcription_start = self.on_transcription_start
         self.jarvis.on_transcription_stop = self.on_transcription_stop
-        self.jarvis.on_transcription_update = self.on_transcription
+        self.jarvis.on_transcription_update = self.on_transcription_update
         self.jarvis.on_llm_update = self.on_llm_update
         self.jarvis.on_llm_start = self.on_llm_start
         self.jarvis.on_llm_stop = self.on_llm_stop
@@ -60,9 +62,14 @@ class JarvisApp:
         self.ui_manager.update_circle_color("green")
         self.ui_manager.update_user_message(None, final=True)
 
-    def on_transcription(self, index, text):
+    def on_transcription_update(self, index, text):
         self.ui_manager.log(f"Transcription for chunk {index}: {text}")
-        self.ui_manager.update_user_message(text)
+        if not self.last_text or self.last_text[-1] in [".", "?", "!"]:
+            self.ui_manager.update_user_message(text)
+        else:
+            self.ui_manager.update_user_message(", " + text.lstrip())
+            
+        self.last_text = text 
 
     def on_llm_start(self):
         self.ui_manager.log("AI is generating response...")
@@ -93,10 +100,14 @@ class JarvisApp:
         self.ui_manager.update_circle_glow(power)
 
     def start_listening(self, event=None):
-        asyncio.run(self.jarvis.listen())
+        asyncio.run_coroutine_threadsafe(self.jarvis.listen(), self.loop)
 
     def stop_audio(self, event=None):
         self.jarvis.stop_tts()
+
+    def run_asyncio_loop(self):
+        asyncio.set_event_loop(self.loop)
+        self.loop.run_forever()
 
 if __name__ == "__main__":
     root = tk.Tk()

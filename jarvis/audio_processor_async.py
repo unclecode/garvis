@@ -83,55 +83,64 @@ class AudioProcessor:
         if self.on_audio_power:
             self.on_audio_power(power)
 
-    async def process_audio(self, index, audio_frames, stop_listening=False, callback=None):
-        if not self.listening:
-            self.log(f"Skipping chunk {index} processing. Not listening.")
-            return
+    def process_audio(self, index, audio_frames, stop_listening=False, callback=None):
+        def process():
+            if not self.listening:
+                self.log(f"Skipping chunk {index} processing. Not listening.")
+                return
+                
+            if not self.has_speech(audio_frames):
+                self.log(f"No significant speech detected in chunk {index}. Skipping transcription.")
+                return
+
+            in_memory_file = io.BytesIO()
+            wf = wave.open(in_memory_file, 'wb')
+            wf.setnchannels(1)
+            wf.setsampwidth(self.audio.get_sample_size(pyaudio.paInt16))
+            wf.setframerate(SAMPLE_RATE)
+            wf.writeframes(b''.join(audio_frames))
+            wf.close()
+
+            self.log("Audio saved to in-memory file.")
+
+            text = self.transcribe_audio(in_memory_file)
+            # text = "Why sky is blue?"
+            if text.lower().strip(' .') == "thank you":
+                # Get length of aufio binarydata
+                audio_length = len(in_memory_file.getvalue())
+                print("\n\r AUDIO length: " + str(audio_length) + "\n\r")
+                return
             
-        if not self.has_speech(audio_frames):
-            self.log(f"No significant speech detected in chunk {index}. Skipping transcription.")
-            return
+            self.jarvis.transcription_update(index, text)
 
-        in_memory_file = io.BytesIO()
-        wf = wave.open(in_memory_file, 'wb')
-        wf.setnchannels(1)
-        wf.setsampwidth(self.audio.get_sample_size(pyaudio.paInt16))
-        wf.setframerate(SAMPLE_RATE)
-        wf.writeframes(b''.join(audio_frames))
-        wf.close()
+            if callback:
+                if not callback(self, index, text):
+                    return 
+            
+            if stop_listening:
+                asyncio.run_coroutine_threadsafe(self.toggle_listen(), self.jarvis.loop)
 
-        self.log("Audio saved to in-memory file.")
-
-        text = await self.transcribe_audio(in_memory_file)
-        # text = "Why sky is blue?"
-        
-        self.jarvis.transcription_update(index, text)
-
-        if callback:
-            if not callback(self, index, text):
-                return 
-        
-        if stop_listening:
-            await self.toggle_listen()
+        threading.Thread(target=process).start()
+            # await self.toggle_listen()
 
     def has_speech(self, audio_frames):
         audio_data = b''.join(audio_frames)
         audio_array = np.frombuffer(audio_data, dtype=np.int16)
         return np.max(np.abs(audio_array)) > SPEECH_THRESHOLD
 
-    async def transcribe_audio(self, in_memory_file):
+    def transcribe_audio(self, in_memory_file):
         if self.transcriptor == "groq":
-            return await self.transcribe_audio_groq(in_memory_file)
+            return self.transcribe_audio_groq(in_memory_file)
         elif self.transcriptor == "colab":
-            return await self.transcribe_audio_colab(in_memory_file)
+            return self.transcribe_audio_colab(in_memory_file)
         
-    async def transcribe_audio_groq(self, in_memory_file):
+    def transcribe_audio_groq(self, in_memory_file):
         client = Groq()
         transcription = ""
 
         in_memory_file.seek(0)
         start = time.time()
-        transcription = await client.audio.transcriptions.create(
+        transcription = client.audio.transcriptions.create(
             file=("in_memory_audio.wav", in_memory_file.read()),
             model="whisper-large-v3",
         )
@@ -139,11 +148,11 @@ class AudioProcessor:
         self.log(f"Transcription time: {end - start:.2f} seconds")
         return transcription.text
 
-    async def transcribe_audio_colab(self, in_memory_file):
+    def transcribe_audio_colab(self, in_memory_file):
         in_memory_file.seek(0)
         start = time.time()
         
-        full_result = await acall_transcribe(in_memory_file)
+        full_result = call_transcribe(in_memory_file)
         text = [segment["text"] for segment in full_result["segments"]]
         text = " ".join(text)
         

@@ -8,10 +8,11 @@ from jarvis.listening_strategy import *
 class TerminalUI:
     def __init__(self):
         self.jarvis = Jarvis(
-            listening_strategy= RealTimeWithSilenceStrategy(),
+            listening_strategy= RealTimeWithSilenceStrategy(threshold_silence=0.3, threshold_end=3.5),
             # listening_strategy= RealTimeStrategy(threshold_silence=0.3),
             # listening_strategy= IntentBaseRealTimeStrategy(),
-            transcriptor="colab",
+            # transcriptor="colab",
+            transcriptor="groq",
         )
         self.setup_event_handlers()
         self.transcription_buffer = ""
@@ -54,12 +55,14 @@ class TerminalUI:
         xprint(text, color="green", end="")
         
     def llm_stop(self):
-        asyncio.create_task(self.wait_for_keypress())
+        # asyncio.create_task(self.wait_for_keypress())
+        pass
     
     def tts_start(self):
         pass
 
     def tts_stop(self):
+        asyncio.create_task(self.wait_for_keypress())
         pass
 
     def audio_power(self, power):
