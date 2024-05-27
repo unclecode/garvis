@@ -14,8 +14,9 @@ import tty
 import termios
 import shutil 
 import sys
-import aioconsole
 import threading
+from dotenv import load_dotenv
+load_dotenv()
 
 lock = threading.Lock()
 
@@ -112,7 +113,10 @@ def get_keypress_sync():
         termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
 def call_transcribe_stream(audio_bytes: BytesIO, initial_prompt: str = ""):
-    url = "https://colab.ngrok.pro/transcribe_stream"
+    url = os.environ.get("COLAB_URL", None)
+    if not url:
+        raise ValueError("COLAB_URL environment variable is not set.")
+    url = url + "transcribe_stream"
     m = MultipartEncoder(
         fields={
             'audio': ('audio.wav', audio_bytes, 'audio/wav'),
@@ -126,7 +130,11 @@ def call_transcribe_stream(audio_bytes: BytesIO, initial_prompt: str = ""):
             yield line.decode('utf-8')
 
 def call_transcribe(audio_bytes: BytesIO, initial_prompt: str = ""):
-    url = "https://colab.ngrok.pro/transcribe"
+    url = os.environ.get("COLAB_URL", None)
+    if not url:
+        raise ValueError("COLAB_URL environment variable is not set.")
+    url = url + "transcribe"
+    
     m = MultipartEncoder(
         fields={
             'audio': ('audio.wav', audio_bytes, 'audio/wav'),
@@ -138,7 +146,10 @@ def call_transcribe(audio_bytes: BytesIO, initial_prompt: str = ""):
     return response.json()
 
 async def acall_transcribe_stream(audio_bytes: BytesIO, initial_prompt: str = ""):
-    url = "https://colab.ngrok.pro/transcribe_stream"
+    url = os.environ.get("COLAB_URL", None)
+    if not url:
+        raise ValueError("COLAB_URL environment variable is not set.")
+    url = url + "transcribe_stream"
     async with aiohttp.ClientSession() as session:
         async with session.post(url, data={
             'audio': ('audio.wav', audio_bytes, 'audio/wav'),
@@ -149,7 +160,10 @@ async def acall_transcribe_stream(audio_bytes: BytesIO, initial_prompt: str = ""
                     yield line.decode('utf-8')
 
 async def acall_transcribe(audio_bytes: BytesIO, initial_prompt: str = ""):
-    url = "https://colab.ngrok.pro/transcribe"
+    url = os.environ.get("COLAB_URL", None)
+    if not url:
+        raise ValueError("COLAB_URL environment variable is not set.")
+    url = url + "transcribe"
     async with aiohttp.ClientSession() as session:
         with MultipartWriter('form-data') as mpwriter:
             part = mpwriter.append(audio_bytes)

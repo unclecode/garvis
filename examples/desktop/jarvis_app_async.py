@@ -23,8 +23,8 @@ class JarvisApp:
         
         self.jarvis = Jarvis(
             assistant_name=self.assistant_name,
-            listening_strategy=RealTimeWithSilenceStrategy(threshold_silence=0.4, threshold_end=2.5),
-            transcriptor="colab",
+            listening_strategy=RealTimeWithSilenceStrategy(threshold_silence=0.1, threshold_end=2.5),
+            transcriptor="groq",
             llm=AsyncGroq(),
             verbose=True
         )
@@ -61,6 +61,9 @@ class JarvisApp:
         self.ui_manager.log("Stopped listening.")
         self.ui_manager.update_circle_color("green")
         self.ui_manager.update_user_message(None, final=True)
+        
+        self.ui_manager.log("AI is generating response...")
+        self.ui_manager.update_jarvis_message("")
 
     def on_transcription_update(self, index, text):
         self.ui_manager.log(f"Transcription for chunk {index}: {text}")
@@ -72,8 +75,9 @@ class JarvisApp:
         self.last_text = text 
 
     def on_llm_start(self):
-        self.ui_manager.log("AI is generating response...")
-        self.ui_manager.update_jarvis_message("")
+        # self.ui_manager.log("AI is generating response...")
+        # self.ui_manager.update_jarvis_message("")
+        pass
 
     def on_llm_update(self, text):
         self.ui_manager.update_jarvis_message(text)

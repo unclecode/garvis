@@ -184,6 +184,8 @@ class UIManager:
             self.log("No messages found in scrollable frame.")
 
     def update_user_message(self, text, final=False):
+        if self.app.current_jarvis_message:
+            return
         if not self.app.current_user_message:
             self.app.current_user_message = self.create_message_frame("You", "")
             

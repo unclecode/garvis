@@ -9,6 +9,7 @@ from .utils import *
 from .config import *
 from .listening_strategy import *
 
+
 class AudioProcessor:
     def __init__(self, jarvis, strategy, transcriptor=DEFAULT_TRANSCRIPTOR, verbose=False):
         assert jarvis is not None, "Jarvis instance is required."
