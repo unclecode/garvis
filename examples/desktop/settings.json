@@ -1,5 +1,5 @@
 {
-    "assistant_name": "Jarvis",
+    "assistant_name": "Garvis",
     "listen_strategy": "RealTimeStrategy",
     "threshold_silence": 0.5,
     "frame_duration": 30,

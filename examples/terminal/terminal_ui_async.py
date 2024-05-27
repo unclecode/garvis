@@ -1,13 +1,13 @@
 import sys, os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 import asyncio
-from jarvis.core_async import Jarvis
-from jarvis.utils import *
-from jarvis.listening_strategy import *
+from garvis.core_async import Garvis
+from garvis.utils import *
+from garvis.listening_strategy import *
 
 class TerminalUI:
     def __init__(self):
-        self.jarvis = Jarvis(
+        self.garvis = Garvis(
             listening_strategy= RealTimeWithSilenceStrategy(threshold_silence=0.3, threshold_end=3.5),
             # listening_strategy= RealTimeStrategy(threshold_silence=0.3),
             # listening_strategy= IntentBaseRealTimeStrategy(),
@@ -22,16 +22,16 @@ class TerminalUI:
         self.print_lock = asyncio.Lock()
 
     def setup_event_handlers(self):
-        self.jarvis.on_log = self.log
-        self.jarvis.on_transcription_start = self.transcription_start
-        self.jarvis.on_transcription_stop = self.transcription_stop
-        self.jarvis.on_transcription_update = self.transcription_update
-        self.jarvis.on_llm_update = self.llm_update
-        self.jarvis.on_llm_start = self.llm_start
-        self.jarvis.on_llm_stop = self.llm_stop
-        self.jarvis.on_tts_start = self.tts_start
-        self.jarvis.on_tts_stop = self.tts_stop
-        self.jarvis.audio_processor.on_audio_power = self.audio_power
+        self.garvis.on_log = self.log
+        self.garvis.on_transcription_start = self.transcription_start
+        self.garvis.on_transcription_stop = self.transcription_stop
+        self.garvis.on_transcription_update = self.transcription_update
+        self.garvis.on_llm_update = self.llm_update
+        self.garvis.on_llm_start = self.llm_start
+        self.garvis.on_llm_stop = self.llm_stop
+        self.garvis.on_tts_start = self.tts_start
+        self.garvis.on_tts_stop = self.tts_stop
+        self.garvis.audio_processor.on_audio_power = self.audio_power
 
     def log(self, message):
         xprint(f"[LOG] {message}", color="dim")
@@ -48,7 +48,7 @@ class TerminalUI:
         self.transcription_buffer = ""
 
     def llm_start(self):
-        xprint("\n\rJarvis: ", style="bold", color="green", end="")
+        xprint("\n\rGarvis: ", style="bold", color="green", end="")
 
     def llm_update(self, text):
         text = text.replace("\n", "\n\r")
@@ -69,8 +69,8 @@ class TerminalUI:
         pass
 
     async def start_listening(self):
-        self.jarvis.stop_talking()
-        asyncio.create_task(self.jarvis.listen())
+        self.garvis.stop_talking()
+        asyncio.create_task(self.garvis.listen())
 
     async def wait_for_keypress(self):
         xprint("\n\rPress any key to listen or 'q' to quit.\n\r", color="bright_black", end="")
@@ -83,7 +83,7 @@ class TerminalUI:
             await self.start_listening()
 
     async def start(self):
-        xprint("\rHello, I am Jarvis.", end="")
+        xprint("\rHello, I am Garvis.", end="")
         await self.wait_for_keypress()
         while True:
             await asyncio.sleep(1)

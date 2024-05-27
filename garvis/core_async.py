@@ -15,7 +15,7 @@ from .listening_strategy import *
 from .llm import *
 from .utils import websocker_text_iterator, create_mpv_process
 
-class Jarvis:
+class Garvis:
     def __init__(self, 
                  assistant_name: str = DEFAULT_ASSISTANT_NAME, 
                  llm: LLM = AsyncOpenAI(),

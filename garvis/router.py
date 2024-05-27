@@ -5,50 +5,50 @@ from semantic_router.layer import RouteLayer
 
 # Define the semantic routes for detecting stop commands
 encoder = OpenAIEncoder()
-jarvis_stop = Route(
-    name="jarvis-stop",
+garvis_stop = Route(
+    name="garvis-stop",
     utterances=[
-        "jarvis, listen to me",
+        "garvis, listen to me",
         "stop please",
         "No need to talk about that",
-        "jarvis stop",
-        "jarvis, stop",
+        "garvis stop",
+        "garvis, stop",
         "stop now",
         "please stop",
-        "jarvis, I need you to stop",
+        "garvis, I need you to stop",
         "stop it now",
-        "jarvis stop talking",
+        "garvis stop talking",
         "I need you to stop now",
         "can you stop",
-        "jarvis stop please"
+        "garvis stop please"
     ],
 )
-jarvis_stop_implicit = Route(
-    name="jarvis-stop-implicit",
+garvis_stop_implicit = Route(
+    name="garvis-stop-implicit",
     utterances=[
-        "jarvis, can you hear me?",
-        "jarvis, I have something to say",
-        "jarvis, wait a moment",
-        "jarvis, hold on",
-        "jarvis, listen to me",
-        "jarvis, I need to talk",
-        "jarvis, I have a question",
-        "jarvis, let me speak",
-        "jarvis, give me a moment",
-        "jarvis, pause for a second",
-        "jarvis, I need your attention",
-        "jarvis, please listen",
-        "jarvis, can we talk?",
-        "jarvis, let me interrupt",
-        "jarvis, allow me to talk",
-        "jarvis, can I say something?",
-        "jarvis, I need to say something",
-        "jarvis, hold on a second",
-        "jarvis, I want to say something"
+        "garvis, can you hear me?",
+        "garvis, I have something to say",
+        "garvis, wait a moment",
+        "garvis, hold on",
+        "garvis, listen to me",
+        "garvis, I need to talk",
+        "garvis, I have a question",
+        "garvis, let me speak",
+        "garvis, give me a moment",
+        "garvis, pause for a second",
+        "garvis, I need your attention",
+        "garvis, please listen",
+        "garvis, can we talk?",
+        "garvis, let me interrupt",
+        "garvis, allow me to talk",
+        "garvis, can I say something?",
+        "garvis, I need to say something",
+        "garvis, hold on a second",
+        "garvis, I want to say something"
     ],
 )
-jarvis_stop_without_name = Route(
-    name="jarvis-stop-without-name",
+garvis_stop_without_name = Route(
+    name="garvis-stop-without-name",
     utterances=[
         "can you hear me?",
         "I have something to say",
@@ -73,12 +73,12 @@ jarvis_stop_without_name = Route(
 )
 
 # Create a combined list of routes
-routes = [jarvis_stop, jarvis_stop_implicit, jarvis_stop_without_name]
+routes = [garvis_stop, garvis_stop_implicit, garvis_stop_without_name]
 rl = RouteLayer(encoder=encoder, routes=routes)
 
-def is_call_jarvis(text):
+def is_call_garvis(text):
     route = rl(text)
-    return route.name in ["jarvis-stop", "jarvis-stop-implicit", "jarvis-stop-without-name"]
+    return route.name in ["garvis-stop", "garvis-stop-implicit", "garvis-stop-without-name"]
 
 # Define the route for detecting the end of conversation
 user_endings = Route(

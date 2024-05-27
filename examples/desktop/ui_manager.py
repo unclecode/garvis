@@ -5,13 +5,13 @@ from tkinter import ttk
 import os
 from PIL import Image, ImageTk
 import json
-from jarvis.utils import get_listening_strategies
-from jarvis.config import *
+from garvis.utils import get_listening_strategies
+from garvis.config import *
 
 # Constants
 CONFIG_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
 USER_AVATAR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "user.png")
-GARVIS_AVATAR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "jarvis.jpeg")
+GARVIS_AVATAR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "garvis.jpeg")
 SETTINGS_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "settings.json")
 
 class UIManager:
@@ -20,11 +20,11 @@ class UIManager:
         self.app = app
         self.avatars = {
             "You": USER_AVATAR,
-            "Jarvis": GARVIS_AVATAR
+            "Garvis": GARVIS_AVATAR
         }
         self.stop_button = None
         self.listen_strategy_var = tk.StringVar(value="ContinuousUntilSilenceStrategy")
-        self.assistant_name_var = tk.StringVar(value="Jarvis")
+        self.assistant_name_var = tk.StringVar(value="Garvis")
         self.threshold_silence_var = tk.DoubleVar(value=THRESHOLD_SILENCE)
         self.frame_duration_var = tk.IntVar(value=FRAME_DURATION_MS)
         self.speech_threshold_var = tk.IntVar(value=SPEECH_THRESHOLD)
@@ -34,7 +34,7 @@ class UIManager:
         self.load_settings()
 
     def setup_ui(self):
-        self.master.title("Jarvis (Groq+Jarvis)")
+        self.master.title("Garvis (Groq+Garvis)")
         self.master.geometry("600x1000")
         
         self.master.focus_force()
@@ -184,7 +184,7 @@ class UIManager:
             self.log("No messages found in scrollable frame.")
 
     def update_user_message(self, text, final=False):
-        if self.app.current_jarvis_message:
+        if self.app.current_garvis_message:
             return
         if not self.app.current_user_message:
             self.app.current_user_message = self.create_message_frame("You", "")
@@ -195,15 +195,15 @@ class UIManager:
         if final:
             self.app.current_user_message = None
 
-    def update_jarvis_message(self, text, final=False):
-        if not self.app.current_jarvis_message:
-            self.app.current_jarvis_message = self.create_message_frame("Jarvis", text, "Jarvis")
+    def update_garvis_message(self, text, final=False):
+        if not self.app.current_garvis_message:
+            self.app.current_garvis_message = self.create_message_frame("Garvis", text, "Garvis")
             
-        if self.app.current_jarvis_message and text:
+        if self.app.current_garvis_message and text:
             self.append_message_text(text)
             
         if final:
-            self.app.current_jarvis_message = None
+            self.app.current_garvis_message = None
         
 
     def on_closing(self):
@@ -254,7 +254,7 @@ class UIManager:
         if os.path.exists(SETTINGS_FILE):
             with open(SETTINGS_FILE, 'r') as f:
                 settings = json.load(f)
-                self.assistant_name_var.set(settings.get('assistant_name', 'Jarvis'))
+                self.assistant_name_var.set(settings.get('assistant_name', 'Garvis'))
                 self.listen_strategy_var.set(settings.get('listen_strategy', 'ContinuousUntilSilenceStrategy'))
                 self.threshold_silence_var.set(settings.get('threshold_silence', 0.5))
                 self.frame_duration_var.set(settings.get('frame_duration', 30))

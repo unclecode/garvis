@@ -11,10 +11,10 @@ from .listening_strategy import *
 
 
 class AudioProcessor:
-    def __init__(self, jarvis, strategy, transcriptor=DEFAULT_TRANSCRIPTOR, verbose=False):
-        assert jarvis is not None, "Jarvis instance is required."
+    def __init__(self, garvis, strategy, transcriptor=DEFAULT_TRANSCRIPTOR, verbose=False):
+        assert garvis is not None, "Garvis instance is required."
         assert strategy is not None, "Listening strategy is required."
-        self.jarvis = jarvis
+        self.garvis = garvis
         self.strategy = strategy
         self.audio_frames = []
         self.chunk_index = 0
@@ -42,7 +42,7 @@ class AudioProcessor:
 
     def log(self, message):
         if self.verbose:
-            self.jarvis.log(message)
+            self.garvis.log(message)
 
     def update_listening_strategy(self, strategy):
         self.strategy = create_instance(strategy)
@@ -72,10 +72,10 @@ class AudioProcessor:
             # if self.audio_frames:
             #     await self.process_audio(self.chunk_index + 1, self.audio_frames.copy())
             self.log("Stopped listening.")
-            self.jarvis.transcription_stop()
+            self.garvis.transcription_stop()
         else:
             self.listening = True
-            self.jarvis.transcription_start()
+            self.garvis.transcription_start()
             self.stream.start_stream()
             self.log("Started listening.")
             await self.strategy.listen(self)
@@ -112,14 +112,14 @@ class AudioProcessor:
                 print("\n\r AUDIO length: " + str(audio_length) + "\n\r")
                 return
             
-            self.jarvis.transcription_update(index, text)
+            self.garvis.transcription_update(index, text)
 
             if callback:
                 if not callback(self, index, text):
                     return 
             
             if stop_listening:
-                asyncio.run_coroutine_threadsafe(self.toggle_listen(), self.jarvis.loop)
+                asyncio.run_coroutine_threadsafe(self.toggle_listen(), self.garvis.loop)
 
         threading.Thread(target=process).start()
             # await self.toggle_listen()
