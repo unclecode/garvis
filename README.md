@@ -26,15 +26,15 @@ Welcome to Garvis! This project leverages the speech-to-text endpoint from Groq,
 ### Installation
 
 1. Clone the repository:
-    ```
-    git clone https://github.com/unclecode/garvis.git
-    cd garvis
-    ```
+```
+git clone https://github.com/unclecode/garvis.git
+cd garvis
+```
 
 2. Install the required dependencies:
-    ```
-    pip install -r requirements.txt
-    ```
+```
+pip install -r requirements.txt
+```
 
 ### Usage
 
@@ -46,19 +46,19 @@ Welcome to Garvis! This project leverages the speech-to-text endpoint from Groq,
 
 Navigate to the `examples/desktop` directory and run the application:
 
-    ```
-    cd examples/desktop
-    python jarvis_app_async.py
-    ```
+```
+cd examples/desktop
+python jarvis_app_async.py
+```
 
 #### Terminal Application
 
 Navigate to the `examples/terminal` directory and run the terminal example:
 
-    ```
-    cd examples/terminal
-    python terminal_ui_async.py
-    ```
+```
+cd examples/terminal
+python terminal_ui_async.py
+```
 
 
 ## Contributing
